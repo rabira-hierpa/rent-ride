@@ -2,6 +2,7 @@ import { Avatar, Dropdown, Menu } from "antd";
 import { AuthContext } from "../../context/auth.context";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
+
 export const userNameInitials = (input: string) => {
   if (input) {
     const names = input?.split(" ");
@@ -29,10 +30,7 @@ const UserBadge = ({
   const userBadgeContent = () => {
     return (
       <div className="flex items-center space-x-2 cursor-pointer">
-        <span
-          className="font-medium capitalize  text-3"
-          style={{ color: "#18191F" }}
-        >
+        <span className="font-medium capitalize text-white  text-3">
           {fullName}
         </span>
         <Avatar
