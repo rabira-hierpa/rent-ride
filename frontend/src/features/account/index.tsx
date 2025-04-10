@@ -5,14 +5,22 @@ import ConfirmationPage from "./components/comfirmation.component";
 import ForgotPassword from "./components/forgot.password.component";
 import ResetPassword from "./components/reset.password.component";
 
-const LoginPage = lazy(() => import("./components/login.component"));
-const RegisterPage = lazy(() => import("./components/register.component"));
+const LoginPage = lazy(() =>
+  import("./components/login.component").then((module) => ({
+    default: module.default,
+  }))
+);
+const RegisterPage = lazy(() =>
+  import("./components/register.component").then((module) => ({
+    default: module.default,
+  }))
+);
 
 function AccountPage() {
   return (
     <div>
       <div className="flex my-8 justify-center">
-        <span>Fullstack Auth</span>
+        <span className="text-2xl font-bold">Rent Ride</span>
       </div>
       <div
         style={{
