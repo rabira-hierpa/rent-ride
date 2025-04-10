@@ -4,10 +4,15 @@ export interface Location {
 }
 
 export interface Car {
-  id: string; // Use unique IDs, maybe UUIDs or sequential numbers
+  id: string;
   modelName: string;
   availability: boolean;
   bookedBy: string | null;
-  bookedAt: Date | null; // Or string if preferred, handle parsing
+  bookedAt: Date | null;
   location: Location;
+}
+
+export interface RentedCar extends Car {
+  rentedAt: Date;
+  returnLocation: Location;
 }
