@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Form, Input, Button } from "antd";
 import { MailOutlined, LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +19,7 @@ const Register = () => {
     "" | "success" | "warning" | "error" | "validating" | undefined
   >("");
 
-  const isEmailExist = () => {
+  const isEmailExist = useCallback(() => {
     if (!emailValue) return;
 
     isEmailExistApi(String(emailValue).trim())
@@ -37,11 +37,11 @@ const Register = () => {
         setValidationStatus("error");
         return Promise.reject(new Error(error?.message));
       });
-  };
+  }, [emailValue]);
 
   useEffect(() => {
     isEmailExist();
-  }, [emailValue]);
+  }, [emailValue, isEmailExist]);
 
   const onFinish = async (values: User) => {
     registerApi(values)
