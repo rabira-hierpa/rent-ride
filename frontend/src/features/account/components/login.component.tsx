@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { Form, Input, Button } from "antd";
 import { MailOutlined, LockOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { ErrorResponse, useNavigate } from "react-router-dom";
 import { TopHeader } from "../ui/header";
 import { Credentials } from "../../../shared/lib/types/crednetialds.type";
 import { loginApi } from "../apis/account.api";
@@ -13,6 +13,10 @@ const Login = () => {
   const navigate = useNavigate();
   const authContext = useContext(AuthContext);
   const [form] = Form.useForm();
+  const initialValues: Credentials = {
+    email: "",
+    password: "",
+  };
 
   const onFinish = async (values: Credentials) => {
     try {
@@ -30,7 +34,8 @@ const Login = () => {
                 response?.accessToken?.expiresIn * 1000
               ).toString(),
             });
-            if (authContext.isAdmin) {
+            const isAdmin = authContext.isAdmin && authContext.isAdmin();
+            if (isAdmin) {
               navigate("/admin");
             } else {
               navigate("/dashboard");
@@ -44,8 +49,8 @@ const Login = () => {
         }
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      alert.error(formatErrorMessage(error));
+    } catch (error) {
+      alert.error(formatErrorMessage(error as ErrorResponse));
     }
   };
 
@@ -54,10 +59,7 @@ const Login = () => {
       form={form}
       name="login"
       onFinish={onFinish}
-      initialValues={{
-        email: "",
-        password: "",
-      }}
+      initialValues={initialValues}
     >
       <TopHeader
         className=" mb-8"
