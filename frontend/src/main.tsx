@@ -1,18 +1,21 @@
-import React, { StrictMode } from "react";
+import { StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
-import "./index.css"; // Global styles
-import "antd/dist/reset.css"; // Ant Design reset
-// import App from './App'; // Remove old App import
-import Dashboard from "./features/dashboard/components/Dashboard"; // Import the new Dashboard component
+import "./index.css";
+import "antd/dist/reset.css"; // For Ant Design v5+
+import { AuthProvider } from "./shared/context/auth.context.tsx";
+import { LoadingSpinner } from "./shared/ui/spinner/loading.spinner.tsx";
+import AppRoutes from "./app.routes.tsx";
+import { BrowserRouter } from "react-router-dom";
+import { environment } from "./environments/environment.ts";
 
-const rootElement = document.getElementById("root");
-if (!rootElement) throw new Error("Failed to find the root element");
-
-const root = createRoot(rootElement);
-
-root.render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    {/* <App /> */}
-    <Dashboard /> {/* Render the Dashboard */}
+    <BrowserRouter>
+      <AuthProvider environment={environment}>
+        <Suspense fallback={<LoadingSpinner fullScreen={true} />}>
+          <AppRoutes />
+        </Suspense>
+      </AuthProvider>
+    </BrowserRouter>
   </StrictMode>
 );
