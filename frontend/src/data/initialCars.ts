@@ -4,11 +4,11 @@ import { Car } from "../types";
 const getRandomUaeLocation = () => {
   const minLat = 22.6;
   const maxLat = 26.1;
-  const minLon = 51.6;
-  const maxLon = 56.4;
+  const minLon = 53.5;
+  const maxLon = 56.2;
   return {
-    latitude: Math.random() * (maxLat - minLat) + minLat,
-    longitude: Math.random() * (maxLon - minLon) + minLon,
+    latitude: Number((Math.random() * (maxLat - minLat) + minLat).toFixed(2)),
+    longitude: Number((Math.random() * (maxLon - minLon) + minLon).toFixed(2)),
   };
 };
 
@@ -19,58 +19,72 @@ const generateCarId = () => `car_${carIdCounter++}`;
 export const initialCars: Car[] = [
   {
     id: generateCarId(),
-    modelName: "Tesla Model 3",
+    model: "Tesla Model 3",
+    vendor: "Tesla",
     availability: true,
     bookedBy: null,
     bookedAt: null,
     location: getRandomUaeLocation(),
+    baseLocation: getRandomUaeLocation(),
   },
   {
     id: generateCarId(),
-    modelName: "Volkswagen Golf",
+    model: "Volkswagen Golf",
+    vendor: "Volkswagen",
     availability: true,
     bookedBy: null,
     bookedAt: null,
     location: getRandomUaeLocation(),
+    baseLocation: getRandomUaeLocation(),
   },
   {
     id: generateCarId(),
-    modelName: "Volkswagen Polo",
+    model: "Volkswagen Polo",
+    vendor: "Volkswagen",
     availability: true,
     bookedBy: null,
     bookedAt: null,
     location: getRandomUaeLocation(),
+    baseLocation: getRandomUaeLocation(),
   },
   {
     id: generateCarId(), // Second Polo
-    modelName: "Volkswagen Polo",
+    model: "Volkswagen Polo",
+    vendor: "Volkswagen",
     availability: true,
     bookedBy: null,
     bookedAt: null,
     location: getRandomUaeLocation(),
+    baseLocation: getRandomUaeLocation(),
   },
   {
     id: generateCarId(), // Third Polo
-    modelName: "Volkswagen Polo",
+    model: "Volkswagen Polo",
+    vendor: "Volkswagen",
     availability: true,
     bookedBy: null,
     bookedAt: null,
     location: getRandomUaeLocation(),
+    baseLocation: getRandomUaeLocation(),
   },
   {
     id: generateCarId(),
-    modelName: "Range Rover",
+    model: "Range Rover",
+    vendor: "Range Rover",
     availability: true,
     bookedBy: null,
     bookedAt: null,
     location: getRandomUaeLocation(),
+    baseLocation: getRandomUaeLocation(),
   },
   {
     id: generateCarId(),
-    modelName: "Porsche 911",
+    model: "Porsche 911",
+    vendor: "Porsche",
     availability: true,
     bookedBy: null,
     bookedAt: null,
     location: getRandomUaeLocation(),
+    baseLocation: getRandomUaeLocation(),
   },
 ];
