@@ -4,7 +4,7 @@ import { Car, Location } from "../../../types";
 
 interface CarsState {
   allCars: Car[];
-  selectedCarIdForRent: string | null; // Selected on map
+  selectedCarIdForRent: string[] | null; // Selected on map
   setCarIdForReturn: string | null; // Selected in list
   returnLocation: Location | null; // Selected on map for return
   nameInput: string | null;
@@ -24,22 +24,24 @@ export const carsSlice = createSlice({
   reducers: {
     rentCar: (
       state,
-      action: PayloadAction<{ carId: string; userId: string }>
+      action: PayloadAction<{ carIds: string[]; userName: string }>
     ) => {
-      const { carId, userId } = action.payload;
-      const carIndex = state.allCars.findIndex((car) => car.id === carId);
-      if (carIndex !== -1 && state.allCars[carIndex].availability) {
-        state.allCars[carIndex] = {
-          ...state.allCars[carIndex],
-          availability: false,
-          bookedBy: userId,
-          bookedAt: new Date().toISOString(), // Store as ISO string for serializability
-        };
-        // Clear selections after action
-        state.selectedCarIdForRent = null;
-        state.setCarIdForReturn = null;
-        state.returnLocation = null;
-      }
+      const { carIds, userName } = action.payload;
+      carIds.forEach((carId) => {
+        const carIndex = state.allCars.findIndex((car) => carId === car.id);
+        if (carIndex !== -1 && state.allCars[carIndex].availability) {
+          state.allCars[carIndex] = {
+            ...state.allCars[carIndex],
+            availability: false,
+            bookedBy: userName,
+            bookedAt: new Date().toISOString(), // Store as ISO string for serializability
+          };
+          // Clear selections after action
+          state.selectedCarIdForRent = null;
+          state.setCarIdForReturn = null;
+          state.returnLocation = null;
+        }
+      });
     },
     returnCar: (
       state,
@@ -61,7 +63,7 @@ export const carsSlice = createSlice({
         state.returnLocation = null;
       }
     },
-    selectCarForRent: (state, action: PayloadAction<string | null>) => {
+    selectCarForRent: (state, action: PayloadAction<string[] | null>) => {
       state.selectedCarIdForRent = action.payload;
       // Clear conflicting selections
       if (action.payload) {
@@ -89,6 +91,7 @@ export const carsSlice = createSlice({
     },
     clearListSelection: (state) => {
       state.setCarIdForReturn = null;
+      state.selectedCarIdForRent = null;
     },
   },
 });

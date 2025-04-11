@@ -33,7 +33,7 @@ export const defaultCarSymbol = new PictureMarkerSymbol({
 export const selectedCarSymbol = new PictureMarkerSymbol({
   url: "/assets/car-selected.svg",
   width: 25,
-  height: 45,
+  height: 55,
   xoffset: 0,
   yoffset: 12.5,
 });

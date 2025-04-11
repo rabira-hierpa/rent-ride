@@ -1,11 +1,13 @@
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
-import { Table, Typography, Tag, Button } from "antd";
+import { Table, Typography, Tag, Button, Form, Input } from "antd";
 import { Car, Location } from "../../../types";
-import { selectCarForRent } from "../../../redux/features/cars/carsSlice";
+import {
+  rentCar,
+  selectCarForRent,
+} from "../../../redux/features/cars/carsSlice";
 import { MapViewHandle } from "./map.container.component";
-import { useEffect, useState } from "react";
-import { alert } from "../../../shared/lib/services";
+import { useEffect, useMemo, useState } from "react";
 const { Title } = Typography;
 
 const ControlPanel = ({
@@ -18,17 +20,14 @@ const ControlPanel = ({
   const selectedCarIdForRent = useSelector(
     (state: RootState) => state.cars.selectedCarIdForRent
   );
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(
-    null
-  );
-
+  // const selectedCarIdForReturn = useSelector(
+  //   (state: RootState) => state.cars.setCarIdForReturn
+  // );
+  const [, setSelectedLocation] = useState<Location | null>(null);
+  const [userForm] = Form.useForm();
   useEffect(() => {
     if (mapRef.current) {
       mapRef.current.onMapClick((event) => {
-        setSelectedLocation({
-          latitude: event.screenPoint.x,
-          longitude: event.screenPoint.y,
-        });
         console.log(event);
       });
     }
@@ -61,6 +60,8 @@ const ControlPanel = ({
     {
       title: "Booked At",
       dataIndex: "bookedAt",
+      render: (bookedAt: string) =>
+        bookedAt ? new Date(bookedAt).toLocaleString() : "",
     },
     {
       title: "Location",
@@ -83,29 +84,36 @@ const ControlPanel = ({
   ];
 
   const rowSelection = {
-    type: "radio",
+    selectedRowKeys: selectedCarIdForRent?.length
+      ? [...selectedCarIdForRent]
+      : [],
     onChange: (selectedRowKeys: React.Key[], selectedRows: unknown) => {
-      const selectedCar = (selectedRows as Car[])[0];
-      if (selectedCar) {
-        dispatch(selectCarForRent(selectedCar.id));
-        mapRef.current?.zoomToLocation(selectedCar.location);
+      const selectedCars = selectedRows as Car[];
+      if (selectedCars) {
+        dispatch(selectCarForRent(selectedCars.map((car) => car.id)));
+        mapRef.current?.zoomToLocation(
+          selectedCars[selectedCars.length - 1].location
+        );
+      } else {
+        dispatch(selectCarForRent(null));
       }
     },
   };
 
   const handleRentCar = () => {
-    if (selectedCarIdForRent) {
-      const selectedCar = allCars.find(
-        (car) => car.id === selectedCarIdForRent
+    if (selectedCarIdForRent?.length) {
+      dispatch(
+        rentCar({
+          carIds: selectedCarIdForRent,
+          userName: userForm.getFieldValue("userName"),
+        })
       );
-      if (selectedCar) {
-        console.log({ selectedCar });
-        mapRef.current?.zoomToLocation(selectedCar.location);
-        alert.info("Click on the map to rent the car");
-      } else {
-        alert.error("Please select a car to rent");
-      }
+      userForm.resetFields();
     }
+  };
+
+  const handleClearSelection = () => {
+    dispatch(selectCarForRent(null));
   };
 
   return (
@@ -120,17 +128,30 @@ const ControlPanel = ({
         size="small"
         style={{ width: "100%" }}
       />
-      <div className="flex justify-center space-x-5 items-center py-5">
-        <Button
-          type="primary"
+
+      <div className="flex flex-col ">
+        <Form
+          className="p-5"
+          form={userForm}
           disabled={!selectedCarIdForRent}
-          onClick={handleRentCar}
+          onFinish={handleRentCar}
+          initialValues={{
+            userName: "",
+          }}
         >
-          Rent
-        </Button>
-        <Button type="primary" disabled={!selectedCarIdForRent}>
-          Return
-        </Button>
+          <Form.Item name="userName" label="Name">
+            <Input name="userName" required />
+          </Form.Item>
+          <div className="flex justify-center space-x-5 items-center py-5">
+            <Button type="primary" htmlType="submit">
+              Rent
+            </Button>
+            <Button type="primary">Return</Button>
+            <Button type="primary" onClick={handleClearSelection}>
+              Clear Selection
+            </Button>
+          </div>
+        </Form>
       </div>
     </div>
   );
