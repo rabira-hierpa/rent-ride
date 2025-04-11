@@ -5,7 +5,7 @@ import { Car, Location } from "../../../types";
 interface CarsState {
   allCars: Car[];
   selectedCarIdForRent: string | null; // Selected on map
-  selectedCarIdForReturn: string | null; // Selected in list
+  setCarIdForReturn: string | null; // Selected in list
   returnLocation: Location | null; // Selected on map for return
   nameInput: string | null;
 }
@@ -13,7 +13,7 @@ interface CarsState {
 const initialState: CarsState = {
   allCars: initialCars,
   selectedCarIdForRent: null,
-  selectedCarIdForReturn: null,
+  setCarIdForReturn: null,
   returnLocation: null,
   nameInput: null,
 };
@@ -37,7 +37,7 @@ export const carsSlice = createSlice({
         };
         // Clear selections after action
         state.selectedCarIdForRent = null;
-        state.selectedCarIdForReturn = null;
+        state.setCarIdForReturn = null;
         state.returnLocation = null;
       }
     },
@@ -57,7 +57,7 @@ export const carsSlice = createSlice({
         };
         // Clear selections after action
         state.selectedCarIdForRent = null;
-        state.selectedCarIdForReturn = null;
+        state.setCarIdForReturn = null;
         state.returnLocation = null;
       }
     },
@@ -65,11 +65,11 @@ export const carsSlice = createSlice({
       state.selectedCarIdForRent = action.payload;
       // Clear conflicting selections
       if (action.payload) {
-        state.selectedCarIdForReturn = null;
+        state.setCarIdForReturn = null;
       }
     },
     selectCarForReturn: (state, action: PayloadAction<string | null>) => {
-      state.selectedCarIdForReturn = action.payload;
+      state.setCarIdForReturn = action.payload;
       // Clear conflicting selections
       if (action.payload) {
         state.selectedCarIdForRent = null;
@@ -88,7 +88,7 @@ export const carsSlice = createSlice({
       state.returnLocation = null;
     },
     clearListSelection: (state) => {
-      state.selectedCarIdForReturn = null;
+      state.setCarIdForReturn = null;
     },
   },
 });
