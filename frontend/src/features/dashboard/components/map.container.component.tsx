@@ -1,13 +1,23 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import Map from "@arcgis/core/Map";
 import esirConfig from "@arcgis/core/config";
-import MapView, { MapViewClickEvent } from "@arcgis/core/views/MapView.js";
+import MapView from "@arcgis/core/views/MapView.js";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import Graphic from "@arcgis/core/Graphic";
 import Point from "@arcgis/core/geometry/Point";
-import { ViewClickEvent } from "@arcgis/core/views/View.js";
 
-import { Location } from "../../../types";
+import {
+  Location,
+  MapClickEvent,
+  MapMode,
+  MapViewHandle,
+} from "../../../types";
 import { alert } from "../../../shared/lib/services";
 import { useAppSelector } from "../../../redux/hooks";
 import {
@@ -24,11 +34,6 @@ import { useDispatch } from "react-redux";
 import { MAP_ZOOM } from "../../../shared/lib/constants/constants";
 import { MAP_CENTER } from "../../../shared/lib/constants/constants";
 
-export interface MapViewHandle {
-  zoomToLocation: (location: Location, zoomLevel?: number) => void;
-  onMapClick: (handler: (event: ViewClickEvent) => void) => void;
-}
-
 interface MapContainerProps {
   isReturnCarLoading: boolean;
 }
@@ -38,9 +43,10 @@ const MapContainer = forwardRef<MapViewHandle, MapContainerProps>(
     const mapDivRef = useRef<HTMLDivElement>(null);
     const viewRef = useRef<MapView | null>(null);
     const graphicsLayerRef = useRef<GraphicsLayer | null>(null);
-    const clickHandlerRef = useRef<((event: ViewClickEvent) => void) | null>(
+    const clickHandlerRef = useRef<((event: MapClickEvent) => void) | null>(
       null
     );
+    const [mapMode, setMapMode] = useState<MapMode>(MapMode.SELECT_CAR);
 
     const { allCars } = useAppSelector((state) => state.cars);
     const dispatch = useDispatch();
@@ -59,70 +65,19 @@ const MapContainer = forwardRef<MapViewHandle, MapContainerProps>(
         const map = new Map({
           basemap: "arcgis/streets-night",
         });
-        if (!viewRef.current) {
-          const view = new MapView({
-            container: mapDivRef.current,
-            map: map,
-            center: [MAP_CENTER.LATITUDE, MAP_CENTER.LONGITUDE],
-            zoom: MAP_ZOOM,
-          });
-          viewRef.current = view;
-          view.on("click", (event: MapViewClickEvent) => {
-            const mapPoint = view.toMap(event);
 
-            if (mapPoint) {
-              clickHandlerRef.current?.(event);
-            }
+        const view = new MapView({
+          container: mapDivRef.current,
+          map: map,
+          center: [MAP_CENTER.LATITUDE, MAP_CENTER.LONGITUDE],
+          zoom: MAP_ZOOM,
+        });
+        viewRef.current = view;
 
-            if (!isReturnCarLoading) {
-              // Find the nearest graphic based on proximity
-              const tolerance = 30; // Tolerance in pixels (adjust as needed)
-              const screenPoint = view.toScreen(mapPoint);
-              const carGraphic = graphicsLayerRef.current?.graphics.find(
-                (graphic) => {
-                  if (graphic.geometry && graphic.geometry.type === "point") {
-                    const graphicScreenPoint = view.toScreen(graphic.geometry);
-                    const distance = Math.hypot(
-                      (graphicScreenPoint?.x ?? 0) - (screenPoint?.x ?? 0),
-                      (graphicScreenPoint?.y ?? 0) - (screenPoint?.y ?? 0)
-                    );
-                    return distance <= tolerance; // Check if within tolerance
-                  }
-                  return false;
-                }
-              );
-
-              if (carGraphic) {
-                const attributes = carGraphic.attributes;
-                if (attributes) {
-                  dispatch(
-                    selectCarForRent(
-                      selectedCarIdForRent?.length
-                        ? [...selectedCarIdForRent, attributes.id]
-                        : [attributes.id]
-                    )
-                  );
-                }
-              } else if (!isReturnCarLoading) {
-                dispatch(clearMapSelections());
-              }
-            }
-
-            if (isReturnCarLoading) {
-              clickHandlerRef.current?.(event);
-            }
-          });
-        }
-
-        if (!graphicsLayerRef.current) {
-          graphicsLayerRef.current = new GraphicsLayer({
-            id: "carsLayer",
-          });
-          map.add(graphicsLayerRef.current);
-        } else {
-          graphicsLayerRef.current.removeAll();
-        }
+        graphicsLayerRef.current = new GraphicsLayer({ id: "carsLayer" });
+        map.add(graphicsLayerRef.current);
       }
+
       return () => {
         if (viewRef.current) {
           viewRef.current.destroy();
@@ -130,7 +85,94 @@ const MapContainer = forwardRef<MapViewHandle, MapContainerProps>(
           graphicsLayerRef.current = null;
         }
       };
-    }, [isReturnCarLoading]);
+    }, []);
+
+    useEffect(() => {
+      if (!viewRef.current) return;
+
+      const view = viewRef.current;
+
+      const handleMapClick = (event: MapClickEvent) => {
+        const mapPoint = view.toMap({ x: event.x, y: event.y });
+        if (!mapPoint) return;
+
+        if (clickHandlerRef.current) {
+          clickHandlerRef.current(event);
+        }
+
+        if (mapMode === MapMode.SELECT_CAR) {
+          const tolerance = 30; // Tolerance in pixels
+          const screenPoint = view.toScreen(mapPoint);
+          const carGraphic = graphicsLayerRef.current?.graphics.find(
+            (graphic) => {
+              if (graphic.geometry && graphic.geometry.type === "point") {
+                const graphicScreenPoint = view.toScreen(graphic.geometry);
+                const distance = Math.hypot(
+                  (graphicScreenPoint?.x ?? 0) - (screenPoint?.x ?? 0),
+                  (graphicScreenPoint?.y ?? 0) - (screenPoint?.y ?? 0)
+                );
+                return distance <= tolerance;
+              }
+              return false;
+            }
+          );
+
+          if (carGraphic) {
+            const attributes = carGraphic.attributes;
+            if (attributes) {
+              dispatch(
+                selectCarForRent(
+                  selectedCarIdForRent?.length
+                    ? [...selectedCarIdForRent, attributes.id]
+                    : [attributes.id]
+                )
+              );
+            }
+          } else {
+            dispatch(clearMapSelections());
+          }
+        } else if (mapMode === MapMode.RETURN_CAR) {
+          const latitude = mapPoint.latitude;
+          const longitude = mapPoint.longitude;
+
+          if (typeof latitude === "number" && typeof longitude === "number") {
+            dispatch(
+              selectReturnLocation({
+                latitude,
+                longitude,
+              })
+            );
+
+            if (graphicsLayerRef.current) {
+              const returnLocationGraphic =
+                graphicsLayerRef.current.graphics.find(
+                  (graphic) => graphic.attributes?.id === "returnLocation"
+                );
+              if (returnLocationGraphic) {
+                graphicsLayerRef.current.remove(returnLocationGraphic);
+              }
+              const graphic = new Graphic({
+                attributes: {
+                  id: "returnLocation",
+                },
+                geometry: mapPoint,
+                symbol: selectedLocationSymbol,
+              });
+              graphicsLayerRef.current.add(graphic);
+            }
+          }
+        }
+      };
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const clickHandle = view.on("click", handleMapClick as any); // Type assertion needed for ArcGIS compatibility
+
+      return () => {
+        if (clickHandle && typeof clickHandle.remove === "function") {
+          clickHandle.remove();
+        }
+      };
+    }, [mapMode, selectedCarIdForRent, dispatch]);
 
     useEffect(() => {
       if (graphicsLayerRef.current) {
@@ -161,55 +203,8 @@ const MapContainer = forwardRef<MapViewHandle, MapContainerProps>(
     }, [allCars, selectedCarIdForRent]);
 
     useEffect(() => {
-      if (viewRef.current && isReturnCarLoading) {
-        console.log("isReturnCarLoading [map]", isReturnCarLoading);
-        const handleMapClick = (event: ViewClickEvent) => {
-          const mapPoint = viewRef.current?.toMap(event);
-          const latitude = mapPoint?.latitude;
-          const longitude = mapPoint?.longitude;
-
-          if (
-            mapPoint &&
-            typeof latitude === "number" &&
-            typeof longitude === "number"
-          ) {
-            dispatch(
-              selectReturnLocation({
-                latitude,
-                longitude,
-              })
-            );
-
-            const graphicsLayer = viewRef.current?.map.layers.find(
-              (layer) => layer.id === "carsLayer"
-            ) as GraphicsLayer;
-
-            if (graphicsLayer) {
-              const returnLocationGraphic = graphicsLayer.graphics.find(
-                (graphic) => graphic.attributes?.id === "returnLocation"
-              );
-              if (returnLocationGraphic) {
-                graphicsLayer.remove(returnLocationGraphic);
-              }
-              const graphic = new Graphic({
-                attributes: {
-                  id: "returnLocation",
-                },
-                geometry: mapPoint,
-                symbol: selectedLocationSymbol,
-              });
-              graphicsLayer.add(graphic);
-            }
-          }
-        };
-
-        const clickHandle = viewRef.current.on("click", handleMapClick);
-
-        return () => {
-          clickHandle?.remove();
-        };
-      }
-    }, [isReturnCarLoading, dispatch]);
+      setMapMode(isReturnCarLoading ? MapMode.RETURN_CAR : MapMode.SELECT_CAR);
+    }, [isReturnCarLoading]);
 
     useImperativeHandle(ref, () => ({
       zoomToLocation: (location: Location, zoomLevel?: number) => {
@@ -220,7 +215,7 @@ const MapContainer = forwardRef<MapViewHandle, MapContainerProps>(
           });
         }
       },
-      onMapClick: (handler: (event: ViewClickEvent) => void) => {
+      onMapClick: (handler: (event: MapClickEvent) => void) => {
         clickHandlerRef.current = handler;
       },
     }));

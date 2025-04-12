@@ -6,11 +6,9 @@ import {
   rentCar,
   returnCar,
   selectCarForRent,
-  selectReturnLocation,
   clearMapSelections,
 } from "../../../redux/features/cars/carsSlice";
-import { MapViewHandle } from "./map.container.component";
-import { useEffect } from "react";
+import { MapViewHandle } from "../../../types";
 import { alert } from "../../../shared/lib/services";
 const { Title } = Typography;
 
@@ -34,27 +32,6 @@ const ControlPanel = ({
 
   const [userForm] = Form.useForm();
 
-  useEffect(() => {
-    if (mapRef.current && isReturnCarLoading) {
-      console.log(
-        "isReturnCarLoading [useEffect ControlPanel]",
-        isReturnCarLoading
-      );
-      mapRef.current.onMapClick((event) => {
-        console.log("event", event);
-        if (selectedCarIdForRent?.length) {
-          const location = event.mapPoint;
-          dispatch(
-            selectReturnLocation({
-              latitude: location.latitude,
-              longitude: location.longitude,
-            })
-          );
-        }
-      });
-    }
-  }, [mapRef, dispatch, selectedCarIdForRent, isReturnCarLoading]);
-
   const columns = [
     {
       title: "Model",
@@ -74,7 +51,6 @@ const ControlPanel = ({
           <Tag color="red">Booked</Tag>
         ),
     },
-
     {
       title: "Booked By",
       dataIndex: "bookedBy",
@@ -123,9 +99,7 @@ const ControlPanel = ({
   };
 
   const handleClearSelection = () => {
-    if (!isReturnCarLoading) {
-      dispatch(clearMapSelections());
-    }
+    dispatch(clearMapSelections());
   };
 
   const handleRentCar = () => {
@@ -142,12 +116,14 @@ const ControlPanel = ({
         );
         return;
       }
+      const userName = userForm.getFieldValue("userName");
       dispatch(
         rentCar({
           carIds: selectedCarIdForRent,
-          userName: userForm.getFieldValue("userName"),
+          userName,
         })
       );
+      alert.success(`Dear ${userName} thank you for the rental car`);
       userForm.resetFields();
     }
   };
@@ -170,17 +146,29 @@ const ControlPanel = ({
       );
       return;
     }
+
     setIsReturnCarLoading(true);
+
+    if (selectedReturnLocation) {
+      submitReturnCar();
+    } else {
+      alert.info("Please select a location to return the car");
+    }
+  };
+
+  const submitReturnCar = () => {
     if (!selectedReturnLocation) {
       alert.info("Please select a location to return the car");
       return;
     }
+
     dispatch(
       returnCar({
         carIds: selectedCarIdForRent || [],
         location: JSON.stringify(selectedReturnLocation),
       })
     );
+
     setIsReturnCarLoading(false);
   };
 
@@ -210,16 +198,38 @@ const ControlPanel = ({
           <Form.Item name="userName" label="Name">
             <Input name="userName" required />
           </Form.Item>
+
           <div className="flex justify-center space-x-5 items-center py-5">
-            <Button type="primary" htmlType="submit">
-              Rent
-            </Button>
-            <Button type="primary" onClick={handleReturnCar}>
-              Return
-            </Button>
-            <Button type="primary" onClick={handleClearSelection}>
-              Clear Selection
-            </Button>
+            {isReturnCarLoading ? (
+              <>
+                <Button
+                  type="primary"
+                  onClick={submitReturnCar}
+                  disabled={!selectedReturnLocation}
+                >
+                  Confirm Return
+                </Button>
+                <Button
+                  onClick={() => {
+                    setIsReturnCarLoading(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button type="primary" htmlType="submit">
+                  Rent
+                </Button>
+                <Button type="primary" onClick={handleReturnCar}>
+                  Return
+                </Button>
+                <Button type="primary" onClick={handleClearSelection}>
+                  Clear Selection
+                </Button>
+              </>
+            )}
           </div>
         </Form>
       </div>
