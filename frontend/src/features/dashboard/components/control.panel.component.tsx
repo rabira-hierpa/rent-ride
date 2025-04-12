@@ -4,34 +4,56 @@ import { Table, Typography, Tag, Button, Form, Input } from "antd";
 import { Car, Location } from "../../../types";
 import {
   rentCar,
+  returnCar,
   selectCarForRent,
+  selectReturnLocation,
+  clearMapSelections,
 } from "../../../redux/features/cars/carsSlice";
 import { MapViewHandle } from "./map.container.component";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect } from "react";
+import { alert } from "../../../shared/lib/services";
 const { Title } = Typography;
 
 const ControlPanel = ({
   mapRef,
+  isReturnCarLoading,
+  setIsReturnCarLoading,
 }: {
   mapRef: React.RefObject<MapViewHandle>;
+  isReturnCarLoading?: boolean;
+  setIsReturnCarLoading: (isReturnCarLoading: boolean) => void;
 }) => {
   const dispatch = useDispatch();
   const { allCars } = useSelector((state: RootState) => state.cars);
   const selectedCarIdForRent = useSelector(
     (state: RootState) => state.cars.selectedCarIdForRent
   );
-  // const selectedCarIdForReturn = useSelector(
-  //   (state: RootState) => state.cars.setCarIdForReturn
-  // );
-  const [, setSelectedLocation] = useState<Location | null>(null);
+  const selectedReturnLocation = useSelector(
+    (state: RootState) => state.cars.returnLocation
+  );
+
   const [userForm] = Form.useForm();
+
   useEffect(() => {
-    if (mapRef.current) {
+    if (mapRef.current && isReturnCarLoading) {
+      console.log(
+        "isReturnCarLoading [useEffect ControlPanel]",
+        isReturnCarLoading
+      );
       mapRef.current.onMapClick((event) => {
-        console.log(event);
+        console.log("event", event);
+        if (selectedCarIdForRent?.length) {
+          const location = event.mapPoint;
+          dispatch(
+            selectReturnLocation({
+              latitude: location.latitude,
+              longitude: location.longitude,
+            })
+          );
+        }
       });
     }
-  }, [mapRef]);
+  }, [mapRef, dispatch, selectedCarIdForRent, isReturnCarLoading]);
 
   const columns = [
     {
@@ -92,16 +114,34 @@ const ControlPanel = ({
       if (selectedCars) {
         dispatch(selectCarForRent(selectedCars.map((car) => car.id)));
         mapRef.current?.zoomToLocation(
-          selectedCars[selectedCars.length - 1].location
+          selectedCars[selectedCars.length - 1]?.location
         );
       } else {
-        dispatch(selectCarForRent(null));
+        dispatch(selectCarForRent([]));
       }
     },
   };
 
+  const handleClearSelection = () => {
+    if (!isReturnCarLoading) {
+      dispatch(clearMapSelections());
+    }
+  };
+
   const handleRentCar = () => {
     if (selectedCarIdForRent?.length) {
+      const selectedCars = allCars.filter((car) =>
+        selectedCarIdForRent?.includes(car.id)
+      );
+      const isCarRented = selectedCars.filter((car) => !car.availability);
+      if (isCarRented.length > 0) {
+        alert.error(
+          `${isCarRented.length} car${
+            isCarRented.length > 1 ? "s" : ""
+          } is already rented`
+        );
+        return;
+      }
       dispatch(
         rentCar({
           carIds: selectedCarIdForRent,
@@ -112,8 +152,36 @@ const ControlPanel = ({
     }
   };
 
-  const handleClearSelection = () => {
-    dispatch(selectCarForRent(null));
+  const handleReturnCar = () => {
+    if (!selectedCarIdForRent?.length) {
+      alert.info("Please select a car to return");
+      return;
+    }
+
+    const isCarAvailable = allCars.filter(
+      (car) => selectedCarIdForRent?.includes(car.id) && car.availability
+    );
+
+    if (isCarAvailable.length > 0) {
+      alert.error(
+        `${isCarAvailable.length} car${
+          isCarAvailable.length > 1 ? "s" : ""
+        } is not rented`
+      );
+      return;
+    }
+    setIsReturnCarLoading(true);
+    if (!selectedReturnLocation) {
+      alert.info("Please select a location to return the car");
+      return;
+    }
+    dispatch(
+      returnCar({
+        carIds: selectedCarIdForRent || [],
+        location: JSON.stringify(selectedReturnLocation),
+      })
+    );
+    setIsReturnCarLoading(false);
   };
 
   return (
@@ -133,7 +201,7 @@ const ControlPanel = ({
         <Form
           className="p-5"
           form={userForm}
-          disabled={!selectedCarIdForRent}
+          disabled={!selectedCarIdForRent?.length}
           onFinish={handleRentCar}
           initialValues={{
             userName: "",
@@ -146,7 +214,9 @@ const ControlPanel = ({
             <Button type="primary" htmlType="submit">
               Rent
             </Button>
-            <Button type="primary">Return</Button>
+            <Button type="primary" onClick={handleReturnCar}>
+              Return
+            </Button>
             <Button type="primary" onClick={handleClearSelection}>
               Clear Selection
             </Button>
