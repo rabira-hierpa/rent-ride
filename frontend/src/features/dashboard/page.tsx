@@ -5,7 +5,6 @@ import { MenuOutlined, CloseOutlined } from "@ant-design/icons";
 import { Content } from "antd/es/layout/layout";
 import Sider from "antd/es/layout/Sider";
 import MapContainer from "./components/map.container.component";
-import "@arcgis/core/assets/esri/themes/light/main.css";
 import { MapViewHandle } from "../../types";
 
 const MOBILE_BREAKPOINT = 768;
