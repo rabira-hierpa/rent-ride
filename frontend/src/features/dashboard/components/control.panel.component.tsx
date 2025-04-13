@@ -85,12 +85,11 @@ const ControlPanel = ({
     selectedRowKeys: selectedCarIdForRent?.length
       ? [...selectedCarIdForRent]
       : [],
-    onChange: (selectedRowKeys: React.Key[], selectedRows: unknown) => {
-      const selectedCars = selectedRows as Car[];
-      if (selectedCars) {
-        dispatch(selectCarForRent(selectedCars.map((car) => car.id)));
+    onChange: (selectedRowKeys: React.Key[], selectedRows: Car[]) => {
+      if (selectedRowKeys.length && selectedRows.length) {
+        dispatch(selectCarForRent(selectedRowKeys as string[]));
         mapRef.current?.zoomToLocation(
-          selectedCars[selectedCars.length - 1]?.location
+          (selectedRows as Car[])[selectedRows.length - 1].location
         );
       } else {
         dispatch(selectCarForRent([]));
