@@ -1,9 +1,6 @@
-export const constants = {
-  USER: "user",
-  TOKEN: "accessToken",
-  REFRESH_TOKEN: "refreshToken",
-  EXPIRES_AT: "expiresAt",
-  publicUrls: {
-    ACCOUNT_API: "/account/",
-  },
+export const MAP_CENTER = {
+  LATITUDE: 55.5,
+  LONGITUDE: 24.5,
 };
+
+export const MAP_ZOOM = 8;
