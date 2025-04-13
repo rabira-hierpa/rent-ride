@@ -2,17 +2,7 @@ import PopupTemplate from "@arcgis/core/PopupTemplate";
 import PictureMarkerSymbol from "@arcgis/core/symbols/PictureMarkerSymbol";
 import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol";
 
-export const carSymbol = new SimpleMarkerSymbol({
-  style: "circle",
-  size: 10,
-  color: [226, 114, 114],
-  outline: {
-    color: [255, 255, 255],
-    width: 1,
-  },
-});
-
-export const selectedSymbol = new SimpleMarkerSymbol({
+export const selectedLocationSymbol = new SimpleMarkerSymbol({
   style: "circle",
   size: 25,
   color: [255, 255, 0],
@@ -34,6 +24,14 @@ export const selectedCarSymbol = new PictureMarkerSymbol({
   url: "/assets/car-selected.svg",
   width: 25,
   height: 55,
+  xoffset: 0,
+  yoffset: 12.5,
+});
+
+export const hoveredCarSymbol = new PictureMarkerSymbol({
+  url: "/assets/car-selected.svg",
+  width: 30,
+  height: 60,
   xoffset: 0,
   yoffset: 12.5,
 });
