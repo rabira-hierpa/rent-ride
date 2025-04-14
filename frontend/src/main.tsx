@@ -1,21 +1,28 @@
-import { StrictMode, Suspense } from "react";
+import { StrictMode, Suspense, lazy } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import "antd/dist/reset.css"; // For Ant Design v5+
-import { AuthProvider } from "./shared/context/auth.context.tsx";
-import { LoadingSpinner } from "./shared/ui/spinner/loading.spinner.tsx";
-import AppRoutes from "./app.routes.tsx";
-import { BrowserRouter } from "react-router-dom";
-import { environment } from "./environments/environment.ts";
+import "antd/dist/reset.css";
+import { store } from "./redux/store";
+import { Provider } from "react-redux";
+import { LoadingSpinner } from "./shared/ui/spinner/loading.spinner";
 
-createRoot(document.getElementById("root")!).render(
+const rootElement = document.getElementById("root");
+if (!rootElement) throw new Error("Failed to find the root element");
+
+const root = createRoot(rootElement);
+
+const Dashboard = lazy(() =>
+  import("./features/dashboard/page").then((module) => ({
+    default: module.default,
+  }))
+);
+
+root.render(
   <StrictMode>
-    <BrowserRouter>
-      <AuthProvider environment={environment}>
-        <Suspense fallback={<LoadingSpinner fullScreen={true} />}>
-          <AppRoutes />
-        </Suspense>
-      </AuthProvider>
-    </BrowserRouter>
+    <Provider store={store}>
+      <Suspense fallback={<LoadingSpinner fullScreen={true} />}>
+        <Dashboard />
+      </Suspense>
+    </Provider>
   </StrictMode>
 );

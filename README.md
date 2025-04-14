@@ -1,96 +1,286 @@
-# Fullstack Auth App
+# Rent Ride - Car Rental Management System
 
-This is a fullstack authentication application built with React, TailwindCSS, Ant Design (AntD) for the frontend, and NestJS for the backend.
+A modern car rental management application built with React, TypeScript, and ArcGIS Maps. This application allows users to manage car rentals with an interactive map interface for location tracking.
+
+![Car Rental Management System](https://via.placeholder.com/800x400?text=Rent+Ride+Dashboard)
 
 ## Table of Contents
 
-- [Frontend](#frontend)
-  - [Features](#features)
-  - [Setup](#setup)
-  - [Scripts](#scripts)
-- [Backend](#backend)
-  - [Features](#features-1)
-  - [Setup](#setup-1)
-  - [Scripts](#scripts-1)
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Features](#features)
+- [Setup Instructions](#setup-instructions)
+  - [Prerequisites](#prerequisites)
+  - [Environment Variables](#environment-variables)
+  - [Installation](#installation)
+- [Running the Application](#running-the-application)
+  - [Standard Setup](#standard-setup)
+  - [Docker Setup](#docker-setup)
+- [Testing](#testing)
+- [Deployment](#deployment)
+  - [Standard Deployment](#standard-deployment)
+  - [Docker Deployment](#docker-deployment)
+- [UML Diagram](#uml-diagram)
+- [License](#license)
 
-## Frontend
+## Overview
 
-### Features
+Rent Ride is a car rental management system that provides an intuitive interface for managing a fleet of rental cars. The application integrates with ArcGIS Maps to provide location-based functionalities like tracking car locations and selecting return locations.
 
-- User registration and login
-- Form validation with Ant Design
-- Responsive design with TailwindCSS
-- Feature-Based design pattern
+## Architecture
 
-### Setup
+The application follows a feature-based architecture with the following structure:
 
-1. Navigate to the frontend directory:
+```
+rent-ride/
+├── frontend/ - React application with TypeScript
+│   ├── src/
+│   │   ├── features/ - Feature modules (dashboard, auth, etc.)
+│   │   ├── redux/ - State management with Redux Toolkit
+│   │   ├── shared/ - Shared components, services, and utilities
+│   │   └── types/ - TypeScript type definitions
+```
 
-   ```sh
-   cd frontend
-   ```
+## Features
 
-2. Install dependencies:
+- **Interactive Map Interface**: View and interact with cars on a map
+- **Car Rental Management**: Rent and return cars with user information
+- **Real-time Location Tracking**: Track car locations in real-time
+- **Return Location Selection**: Select return locations for cars via map interaction
+- **Responsive Design**: Works on desktop and mobile devices
 
-   ```sh
-   npm install
-   cp .env.example .env # copy env variables
-   ```
+## Setup Instructions
 
-3. Start the development server:
+### Prerequisites
 
-   ```sh
-   npm start
-   ```
+- Node.js (v16 or higher) and npm (v7 or higher) OR Docker
+- An ArcGIS Developer account for the API key
 
-### Scripts
+### Environment Variables
 
-- `npm start`: Starts the development server.
-- `npm build`: Builds the app for production.
-- `npm test`: Runs the test suite.
+1. Create an `.env` file in the root directory by copying the provided example:
 
-## Backend
+```sh
+cp .env.example .env
+```
 
-### Features
+2. Update the `.env` file with your ArcGIS API key:
 
-- User authentication with JWT
-- RESTful API with NestJS
-- MongoDB Database integration with TypeORM
-- Role based access control
+```
+ARCGIS_API_KEY=your_arcgis_api_key
+```
 
-> To add a user as an admin please update the `roles` field in the database to `["admin"]`. This can be done using a tool like MongoDB Compass.This will be automated in the future.
+#### Obtaining an ArcGIS API Key
 
-### Setup
+1. Sign up for an [ArcGIS Developer account](https://developers.arcgis.com/sign-up/)
+2. Create a new API key from the dashboard
+3. Copy the API key to your `.env` file
 
-1. Navigate to the backend directory:
+For detailed instructions, visit the [ArcGIS Developer Documentation](https://developers.arcgis.com/documentation/mapping-apis-and-services/security/api-keys/)
 
-   ```sh
-   cd backend
-   ```
+### Installation
 
-2. Install dependencies:
+#### Standard Installation
 
-   ```sh
-   npm install
-   cp .env.example .env # copy env variables
-   ```
+1. Clone the repository:
 
-3. Set up the database:
+```sh
+git clone https://github.com/yourusername/rent-ride.git
+cd rent-ride
+```
 
-   ```sh
-   # Make sure to configure your database connection in the .env file
-   npm run typeorm migration:run
-   ```
+2. Install frontend dependencies:
 
-4. Start the development server:
+```sh
+cd frontend
+npm install
+```
 
-   ```sh
-   npm run start:dev
-   ```
+#### Docker Installation
 
-### Scripts
+1. Clone the repository:
 
-- `npm run start:dev`: Starts the development server.
-- `npm run build`: Builds the app for production.
-- `npm run test`: Runs the test suite.
-- `npm run typeorm migration:run`: Runs database migrations.
+```sh
+git clone https://github.com/yourusername/rent-ride.git
+cd rent-ride
+```
+
+2. Create the `.env` file as described in the Environment Variables section.
+
+## Running the Application
+
+### Standard Setup
+
+To start the development server:
+
+```sh
+cd frontend
+npm run dev
+```
+
+The application will be available at http://localhost:5173
+
+### Docker Setup
+
+#### Development Mode
+
+To run the application in development mode with hot-reloading:
+
+```sh
+docker-compose up frontend-dev
+```
+
+The application will be available at http://localhost:5173
+
+#### Production Mode
+
+To run the application in production mode:
+
+```sh
+docker-compose up frontend
+```
+
+The application will be available at http://localhost:80
+
+## Testing
+
+### Standard Testing
+
+Run the tests with:
+
+```sh
+cd frontend
+npm test
+```
+
+For a specific test suite:
+
+```sh
+npm test -- -t "Car Rental Workflow"
+```
+
+### Docker Testing
+
+Run tests inside the Docker container:
+
+```sh
+docker-compose run --rm frontend-dev npm test
+```
+
+For a specific test suite:
+
+```sh
+docker-compose run --rm frontend-dev npm test -- -t "Car Rental Workflow"
+```
+
+## Deployment
+
+### Standard Deployment
+
+To build the application for production:
+
+```sh
+cd frontend
+npm run build
+```
+
+The build artifacts will be stored in the `dist/` directory.
+
+### Docker Deployment
+
+Build and deploy the Docker image:
+
+```sh
+# Build the Docker image
+docker-compose build frontend
+
+# Run the Docker container
+docker-compose up -d frontend
+```
+
+For cloud deployments, you can push the Docker image to a container registry:
+
+```sh
+# Tag the image
+docker tag rent-ride-frontend:latest your-registry/rent-ride-frontend:latest
+
+# Push the image
+docker push your-registry/rent-ride-frontend:latest
+```
+
+## UML Diagram
+
+Below is a UML diagram representing the high-level architecture of the Rent Ride application:
+
+```mermaid
+classDiagram
+    class CarEntity {
+        +string id
+        +string model
+        +string vendor
+        +boolean availability
+        +string bookedBy
+        +string bookedAt
+        +Location location
+        +Location baseLocation
+    }
+
+    class Location {
+        +number latitude
+        +number longitude
+    }
+
+    class ReduxStore {
+        +CarState carsState
+    }
+
+    class CarState {
+        +Car[] allCars
+        +string[] selectedCarIdForRent
+        +Location returnLocation
+    }
+
+    class MapService {
+        +initialize()
+        +addCarMarkers(Car[])
+        +handleMapClick(event)
+    }
+
+    class AlertService {
+        +error(message, title, duration)
+        +success(message, title, duration)
+        +warning(message, title, duration)
+        +info(message, title, duration)
+    }
+
+    class DashboardPage {
+        +render()
+    }
+
+    class MapContainer {
+        +handleMapClick(event)
+        +zoomToLocation(Location)
+        +render()
+    }
+
+    class ControlPanel {
+        +handleRentCar()
+        +handleReturnCar()
+        +handleClearSelection()
+        +render()
+    }
+
+    DashboardPage *-- MapContainer
+    DashboardPage *-- ControlPanel
+    MapContainer --> MapService
+    ControlPanel --> AlertService
+    ControlPanel --> ReduxStore
+    MapContainer --> ReduxStore
+    ReduxStore o-- CarState
+    CarState o-- CarEntity
+    CarEntity o-- Location
+```
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

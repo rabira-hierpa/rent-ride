@@ -15,6 +15,7 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
+    "types": ["jest", "@testing-library/jest-dom", "node"],
 
     /* Linting */
     "strict": true,

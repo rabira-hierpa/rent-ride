@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      - VITE_APP_ARCGIS_API_KEY=${ARCGIS_API_KEY}
+    restart: unless-stopped
+    volumes:
+      # For development only - remove for production
+      - ./frontend:/app
+      - /app/node_modules
+
+  # Development service with hot-reloading
+  frontend-dev:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_APP_ARCGIS_API_KEY=${ARCGIS_API_KEY}
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0
