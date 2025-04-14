@@ -55,7 +55,7 @@ The application follows a modular approach with the following organization:
 
 - **Features**: Self-contained modules representing business domains
 - **Components**: Reusable UI building blocks
-- **Services**: Shared functionality like alerts, API communication
+- **Services**: Shared functionality like alerts
 - **Redux**: State management with slices for different domains
 - **Types**: TypeScript interfaces and type definitions
 
@@ -75,6 +75,7 @@ The application integrates with ArcGIS Maps SDK for JavaScript to provide intera
 - **Map Container**: Handles map initialization and rendering
 - **Car Markers**: Visual representation of cars on the map
 - **Click Handlers**: Support for selecting return locations
+- **Map Mode**: Handles the map mode for the application
 
 ## Dashboard Components
 
@@ -190,6 +191,7 @@ The application is containerized using Docker, providing consistent development 
   - Stage 2: Serves the static files using Nginx
 
 - **Dockerfile.dev**: Development configuration with hot-reloading
+
   - Mounts the source code as a volume
   - Enables live code changes without rebuilding the container
 

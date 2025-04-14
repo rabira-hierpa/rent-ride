@@ -2,7 +2,7 @@
 
 A modern car rental management application built with React, TypeScript, and ArcGIS Maps. This application allows users to manage car rentals with an interactive map interface for location tracking.
 
-![Car Rental Management System](https://via.placeholder.com/800x400?text=Rent+Ride+Dashboard)
+![Car Rental Management System](https://github.com/rabira-hierpa/rent-ride/blob/dev/demo.png)
 
 ## Table of Contents
 
@@ -41,11 +41,12 @@ rent-ride/
 │   │   └── types/ - TypeScript type definitions
 ```
 
+You can read more about the architecture details [here](./frontend/README.md)
+
 ## Features
 
 - **Interactive Map Interface**: View and interact with cars on a map
 - **Car Rental Management**: Rent and return cars with user information
-- **Real-time Location Tracking**: Track car locations in real-time
 - **Return Location Selection**: Select return locations for cars via map interaction
 - **Responsive Design**: Works on desktop and mobile devices
 
