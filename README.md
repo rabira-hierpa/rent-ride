@@ -41,6 +41,8 @@ rent-ride/
 │   │   └── types/ - TypeScript type definitions
 ```
 
+You can read more about the architecture details [here](./frontend/README.md)
+
 ## Features
 
 - **Interactive Map Interface**: View and interact with cars on a map
