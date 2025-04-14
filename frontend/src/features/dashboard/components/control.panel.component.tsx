@@ -82,9 +82,7 @@ const ControlPanel = ({
   ];
 
   const rowSelection = {
-    selectedRowKeys: selectedCarIdForRent?.length
-      ? [...selectedCarIdForRent]
-      : [],
+    selectedRowKeys: selectedCarIdForRent || [],
     onChange: (selectedRowKeys: React.Key[], selectedRows: Car[]) => {
       if (selectedRowKeys.length && selectedRows.length) {
         dispatch(selectCarForRent(selectedRowKeys as string[]));
@@ -104,7 +102,7 @@ const ControlPanel = ({
   const handleRentCar = () => {
     if (selectedCarIdForRent?.length) {
       const selectedCars = allCars.filter((car) =>
-        selectedCarIdForRent?.includes(car.id)
+        selectedCarIdForRent.includes(car.id)
       );
       const isCarRented = selectedCars.filter((car) => !car.availability);
       if (isCarRented.length > 0) {
@@ -134,7 +132,7 @@ const ControlPanel = ({
     }
 
     const isCarAvailable = allCars.filter(
-      (car) => selectedCarIdForRent?.includes(car.id) && car.availability
+      (car) => selectedCarIdForRent.includes(car.id) && car.availability
     );
 
     if (isCarAvailable.length > 0) {

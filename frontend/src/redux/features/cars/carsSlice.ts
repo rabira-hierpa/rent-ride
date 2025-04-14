@@ -4,13 +4,13 @@ import { Car, Location } from "../../../types";
 
 interface CarsState {
   allCars: Car[];
-  selectedCarIdForRent: string[] | null;
+  selectedCarIdForRent: string[];
   returnLocation: Location | null;
 }
 
 const initialState: CarsState = {
   allCars: initialCars,
-  selectedCarIdForRent: null,
+  selectedCarIdForRent: [],
   returnLocation: null,
 };
 
@@ -32,7 +32,7 @@ export const carsSlice = createSlice({
             bookedBy: userName,
             bookedAt: new Date().toISOString(),
           };
-          state.selectedCarIdForRent = null;
+          state.selectedCarIdForRent = [];
           state.returnLocation = null;
         }
       });
@@ -52,19 +52,19 @@ export const carsSlice = createSlice({
             bookedAt: null,
             location: JSON.parse(location),
           };
-          state.selectedCarIdForRent = null;
+          state.selectedCarIdForRent = [];
           state.returnLocation = null;
         }
       });
     },
     selectCarForRent: (state, action: PayloadAction<string[] | null>) => {
-      state.selectedCarIdForRent = action.payload || null;
+      state.selectedCarIdForRent = action.payload || [];
     },
     selectReturnLocation: (state, action: PayloadAction<Location | null>) => {
       state.returnLocation = action.payload;
     },
     clearMapSelections: (state) => {
-      state.selectedCarIdForRent = null;
+      state.selectedCarIdForRent = [];
       state.returnLocation = null;
     },
   },

@@ -224,6 +224,7 @@ const MapContainer = forwardRef<MapViewHandle, MapContainerProps>(
       <div
         ref={mapDivRef}
         style={{ height: "100%", width: "100%", position: "absolute" }}
+        data-testid="map-container-div"
       ></div>
     );
   }
