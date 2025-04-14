@@ -1,6 +1,6 @@
 module.exports = {
   testEnvironment: "jsdom",
-  setupFilesAfterEnv: ["<rootDir>/src/setupTests.ts"],
+  setupFilesAfterEnv: ["<rootDir>/src/jest.setup.ts"],
   moduleNameMapper: {
     // Handle CSS imports (with CSS modules)
     // Handle CSS imports (without CSS modules)
